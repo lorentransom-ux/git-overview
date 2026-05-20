@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Reference Guide</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    code, pre, .font-mono { font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace; }
+    html { scroll-behavior: smooth; }
+
+    /* Accordion animation */
+    .cmd-detail { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .cmd-detail.open { max-height: 600px; }
+
+    /* Hidden by search filter */
+    .search-hidden { display: none !important; }
+
+    /* Tab active state */
+    .tab-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+    .dark .tab-btn.active { background-color: #2563eb; border-color: #2563eb; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+
+    /* Chevron rotation */
+    .chevron { transition: transform 0.2s; display: inline-block; }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* Copy button */
+    .copy-btn { opacity: 0; transition: opacity 0.15s; }
+    .group:hover .copy-btn { opacity: 1; }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+
+<!-- ═══════════════════════════════════════════════════════════ NAV -->
+<nav class="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-800 shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-xl leading-none">🌿</span>
+      <span class="font-bold text-gray-900 dark:text-white">Git Reference</span>
+    </div>
+    <div class="hidden sm:flex items-center gap-5 text-sm">
+      <a href="#flow"       class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">How It Works</a>
+      <a href="#core"       class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Core Commands</a>
+      <a href="#scenarios"  class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Scenarios</a>
+      <a href="#reference"  class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Full Reference</a>
+    </div>
+    <button id="theme-btn" onclick="toggleDark()"
+      class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-base leading-none"
+      title="Toggle dark mode">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 1: FLOW -->
+<section id="flow" class="max-w-6xl mx-auto px-4 pt-14 pb-12">
+  <h2 class="text-3xl font-bold text-center mb-2">How Git Works</h2>
+  <p class="text-center text-gray-500 dark:text-gray-400 mb-10">Git tracks your work across four zones. Every command moves changes between them.</p>
+
+  <!-- Diagram -->
+  <div class="overflow-x-auto pb-2">
+    <div class="flex items-stretch gap-0 justify-center min-w-[680px]">
+
+      <!-- Zone: Working Directory -->
+      <div class="flex-1 max-w-[155px] bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-300 dark:border-blue-700 rounded-xl p-4 flex flex-col items-center text-center gap-1.5">
+        <div class="text-3xl mb-1">📁</div>
+        <div class="font-bold text-blue-900 dark:text-blue-200 text-sm">Working Directory</div>
+        <div class="text-xs text-blue-700 dark:text-blue-400 leading-snug">Your actual files on disk. Where you edit.</div>
+      </div>
+
+      <!-- Connector 1 -->
+      <div class="flex flex-col items-center justify-center gap-3 px-2 min-w-[105px]">
+        <div class="w-full">
+          <div class="text-center text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 mb-1">git add</div>
+          <div class="flex items-center">
+            <div class="flex-1 h-[2px] bg-emerald-500"></div>
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-l-[7px] border-transparent border-l-emerald-500"></div>
+          </div>
+        </div>
+        <div class="w-full">
+          <div class="flex items-center">
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-r-[7px] border-transparent border-r-red-400"></div>
+            <div class="flex-1 h-[2px] bg-red-400"></div>
+          </div>
+          <div class="text-center text-[11px] font-mono font-bold text-red-500 dark:text-red-400 mt-1">git restore</div>
+        </div>
+      </div>
+
+      <!-- Zone: Staging Area -->
+      <div class="flex-1 max-w-[155px] bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-4 flex flex-col items-center text-center gap-1.5">
+        <div class="text-3xl mb-1">📋</div>
+        <div class="font-bold text-amber-900 dark:text-amber-200 text-sm">Staging Area</div>
+        <div class="text-[11px] text-amber-600 dark:text-amber-400 font-mono">(Index)</div>
+        <div class="text-xs text-amber-700 dark:text-amber-400 leading-snug">Changes queued for the next commit.</div>
+      </div>
+
+      <!-- Connector 2 -->
+      <div class="flex flex-col items-center justify-center gap-3 px-2 min-w-[120px]">
+        <div class="w-full">
+          <div class="text-center text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 mb-1">git commit</div>
+          <div class="flex items-center">
+            <div class="flex-1 h-[2px] bg-emerald-500"></div>
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-l-[7px] border-transparent border-l-emerald-500"></div>
+          </div>
+        </div>
+        <div class="w-full">
+          <div class="flex items-center">
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-r-[7px] border-transparent border-r-amber-400"></div>
+            <div class="flex-1 h-[2px] bg-amber-400"></div>
+          </div>
+          <div class="text-center text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 mt-1">git reset --soft</div>
+        </div>
+      </div>
+
+      <!-- Zone: Local Repo -->
+      <div class="flex-1 max-w-[155px] bg-emerald-50 dark:bg-emerald-950/60 border-2 border-emerald-300 dark:border-emerald-700 rounded-xl p-4 flex flex-col items-center text-center gap-1.5">
+        <div class="text-3xl mb-1">🗄️</div>
+        <div class="font-bold text-emerald-900 dark:text-emerald-200 text-sm">Local Repository</div>
+        <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">(.git folder)</div>
+        <div class="text-xs text-emerald-700 dark:text-emerald-400 leading-snug">Full history stored here, on your machine.</div>
+      </div>
+
+      <!-- Connector 3 -->
+      <div class="flex flex-col items-center justify-center gap-3 px-2 min-w-[115px]">
+        <div class="w-full">
+          <div class="text-center text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 mb-1">git push</div>
+          <div class="flex items-center">
+            <div class="flex-1 h-[2px] bg-emerald-500"></div>
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-l-[7px] border-transparent border-l-emerald-500"></div>
+          </div>
+        </div>
+        <div class="w-full">
+          <div class="flex items-center">
+            <div class="w-0 h-0 border-t-[5px] border-b-[5px] border-r-[7px] border-transparent border-r-purple-400"></div>
+            <div class="flex-1 h-[2px] bg-purple-400"></div>
+          </div>
+          <div class="text-center text-[11px] font-mono font-bold text-purple-600 dark:text-purple-400 mt-1">git pull / fetch</div>
+        </div>
+      </div>
+
+      <!-- Zone: Remote -->
+      <div class="flex-1 max-w-[155px] bg-purple-50 dark:bg-purple-950/60 border-2 border-purple-300 dark:border-purple-700 rounded-xl p-4 flex flex-col items-center text-center gap-1.5">
+        <div class="text-3xl mb-1">☁️</div>
+        <div class="font-bold text-purple-900 dark:text-purple-200 text-sm">Remote Repository</div>
+        <div class="text-[11px] text-purple-600 dark:text-purple-400">(GitHub, GitLab…)</div>
+        <div class="text-xs text-purple-700 dark:text-purple-400 leading-snug">Shared with your team online.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Key concepts -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10">
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+      <div class="font-semibold mb-1.5">📸 A commit is a snapshot</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">Not just a diff — Git stores a complete picture of all tracked files at that moment. You can jump back to any commit instantly.</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+      <div class="font-semibold mb-1.5">🌿 Branches are cheap</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">A branch is just a pointer to a commit — creating one is instant. Use branches freely for features, experiments, and fixes.</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+      <div class="font-semibold mb-1.5">🔒 Local history is safe</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">Most operations only touch your local <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">.git</code> folder. Nothing reaches GitHub until you run <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">git push</code>.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════ SECTION 2: CORE COMMANDS -->
+<section id="core" class="max-w-6xl mx-auto px-4 py-12 border-t border-gray-200 dark:border-gray-800">
+  <h2 class="text-3xl font-bold text-center mb-2">Core Commands</h2>
+  <p class="text-center text-gray-500 dark:text-gray-400 mb-8">The 12 commands you'll use in nearly every session</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="core-cards"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════ SECTION 3: SCENARIOS -->
+<section id="scenarios" class="max-w-6xl mx-auto px-4 py-12 border-t border-gray-200 dark:border-gray-800">
+  <h2 class="text-3xl font-bold text-center mb-2">Scenario Workflows</h2>
+  <p class="text-center text-gray-500 dark:text-gray-400 mb-8">Step-by-step command sequences for common real-world situations</p>
+
+  <!-- Tab buttons -->
+  <div class="flex flex-wrap gap-2 justify-center mb-8">
+    <button class="tab-btn px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium bg-white dark:bg-gray-800 hover:border-blue-400 transition-colors" onclick="switchTab(0)">🚀 Start a Project</button>
+    <button class="tab-btn px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium bg-white dark:bg-gray-800 hover:border-blue-400 transition-colors" onclick="switchTab(1)">📤 Push a Change</button>
+    <button class="tab-btn px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium bg-white dark:bg-gray-800 hover:border-blue-400 transition-colors" onclick="switchTab(2)">🔧 Fix a Mistake</button>
+    <button class="tab-btn px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium bg-white dark:bg-gray-800 hover:border-blue-400 transition-colors" onclick="switchTab(3)">🤝 Collaborate</button>
+  </div>
+
+  <div id="tab-panels" class="max-w-2xl mx-auto"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════ SECTION 4: FULL REFERENCE -->
+<section id="reference" class="max-w-6xl mx-auto px-4 py-12 border-t border-gray-200 dark:border-gray-800">
+  <h2 class="text-3xl font-bold text-center mb-2">Full Command Reference</h2>
+  <p class="text-center text-gray-500 dark:text-gray-400 mb-6">Click any command to expand its details</p>
+
+  <!-- Search -->
+  <div class="max-w-lg mx-auto mb-6">
+    <input type="text" id="search-input" placeholder="Search by name or keyword… (e.g. 'branch', 'undo', 'remote')"
+      oninput="filterCommands()"
+      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+  </div>
+
+  <!-- Legend -->
+  <div class="flex flex-wrap gap-3 justify-center mb-8">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">✓ Safe — no permanent consequences</span>
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-xs font-semibold">⚠ Caution — review before running</span>
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 text-xs font-semibold">✕ Destructive — hard to undo</span>
+  </div>
+
+  <div id="reference-container"></div>
+  <div id="no-results" class="hidden text-center py-16 text-gray-400 dark:text-gray-500 text-sm">No commands match your search.</div>
+</section>
+
+<footer class="border-t border-gray-200 dark:border-gray-800 py-8 text-center text-sm text-gray-400 dark:text-gray-600">
+  Git Reference Guide · Open in any browser · No internet required after first load
+</footer>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════ DATA
+
+const coreCommands = [
+  { cmd: 'git init',              desc: 'Initialize a new Git repository in the current folder',        example: 'git init',                                                     danger: 'safe',      group: 'Setup'     },
+  { cmd: 'git clone &lt;url&gt;',       desc: 'Copy a remote repository to your computer',                   example: 'git clone https://github.com/user/repo.git',                   danger: 'safe',      group: 'Setup'     },
+  { cmd: 'git status',            desc: 'Show what\'s changed since the last commit',                   example: 'git status',                                                   danger: 'safe',      group: 'Daily'     },
+  { cmd: 'git add &lt;file&gt;',        desc: 'Stage a file — queue it for the next commit',                 example: 'git add README.md\ngit add .   # stage everything',            danger: 'safe',      group: 'Daily'     },
+  { cmd: 'git commit -m "msg"',   desc: 'Save staged changes as a permanent snapshot',                  example: 'git commit -m "Add login page"',                               danger: 'safe',      group: 'Daily'     },
+  { cmd: 'git push',              desc: 'Upload your local commits to the remote',                      example: 'git push\ngit push -u origin main  # first push',              danger: 'caution',   group: 'Daily'     },
+  { cmd: 'git pull',              desc: 'Download and merge remote changes into your branch',           example: 'git pull',                                                     danger: 'caution',   group: 'Daily'     },
+  { cmd: 'git log --oneline',     desc: 'View a compact commit history',                                example: 'git log --oneline\ngit log --oneline --graph',                 danger: 'safe',      group: 'History'   },
+  { cmd: 'git diff',              desc: 'See exactly what changed since the last commit (unstaged)',    example: 'git diff\ngit diff --staged   # staged changes',               danger: 'safe',      group: 'History'   },
+  { cmd: 'git branch',            desc: 'List all local branches (or create a new one)',                example: 'git branch          # list\ngit branch feature  # create',    danger: 'safe',      group: 'Branching' },
+  { cmd: 'git switch &lt;branch&gt;',   desc: 'Switch to a different branch',                                example: 'git switch main\ngit switch -c new-feature  # create+switch', danger: 'safe',      group: 'Branching' },
+  { cmd: 'git merge &lt;branch&gt;',    desc: 'Integrate changes from another branch into the current one',  example: 'git switch main\ngit merge feature-login',                    danger: 'caution',   group: 'Branching' },
+];
+
+const scenarios = [
+  {
+    title: '🚀 Start a New Project',
+    intro: 'Turn a folder into a Git repo and push it to GitHub for the first time.',
+    steps: [
+      { cmd: 'git init',                                           note: 'Creates a .git folder — this folder is now a repo' },
+      { cmd: 'git add .',                                          note: 'Stage all files for the first commit' },
+      { cmd: 'git commit -m "Initial commit"',                     note: 'Create the first snapshot' },
+      { cmd: 'git remote add origin https://github.com/you/repo.git', note: 'Link to your GitHub repo (create it on GitHub.com first)' },
+      { cmd: 'git push -u origin main',                            note: 'Push and set up tracking — future pushes just need: git push' },
+    ]
+  },
+  {
+    title: '📤 Make and Push a Change',
+    intro: 'The everyday loop: edit → review → stage → commit → push.',
+    steps: [
+      { cmd: '# edit your files in your editor', note: '', isComment: true },
+      { cmd: 'git status',                        note: 'See which files changed' },
+      { cmd: 'git diff',                          note: 'Review the exact lines changed (optional but good habit)' },
+      { cmd: 'git add .',                         note: 'Stage everything — or use git add &lt;file&gt; to be selective' },
+      { cmd: 'git diff --staged',                 note: 'Final review of what you\'re about to commit' },
+      { cmd: 'git commit -m "Describe your change"', note: 'Use present tense: "Add feature" not "Added feature"' },
+      { cmd: 'git push',                          note: 'Send your commit to GitHub' },
+    ]
+  },
+  {
+    title: '🔧 Fix a Mistake',
+    intro: 'Pick the scenario that matches where you are.',
+    subsections: [
+      {
+        label: 'Undo an edit in your working directory (before git add)',
+        steps: [ { cmd: 'git restore &lt;file&gt;', note: 'Discards all unsaved edits to that file — this cannot be undone', danger: 'destructive' } ]
+      },
+      {
+        label: 'Unstage a file (after git add, before git commit)',
+        steps: [ { cmd: 'git restore --staged &lt;file&gt;', note: 'Moves the file back to unstaged — your edits are still there', danger: 'safe' } ]
+      },
+      {
+        label: 'Fix the last commit message',
+        steps: [ { cmd: 'git commit --amend -m "Corrected message"', note: 'Only do this before pushing — it rewrites history', danger: 'caution' } ]
+      },
+      {
+        label: 'Undo the last commit (keep your changes)',
+        steps: [ { cmd: 'git reset --soft HEAD~1', note: 'Moves the commit back to staged — nothing is lost', danger: 'caution' } ]
+      },
+      {
+        label: 'Undo a pushed commit (safe way)',
+        steps: [ { cmd: 'git revert &lt;commit-hash&gt;', note: 'Creates a NEW commit that undoes the old one — safe on shared branches', danger: 'safe' } ]
+      },
+    ]
+  },
+  {
+    title: '🤝 Collaborate on a Branch',
+    intro: 'The standard feature-branch workflow — keeps main clean.',
+    steps: [
+      { cmd: 'git switch main',                             note: 'Start from main' },
+      { cmd: 'git pull',                                    note: 'Get the latest changes from the remote' },
+      { cmd: 'git switch -c feature/my-feature',            note: 'Create and switch to a new branch' },
+      { cmd: '# make your changes',                         note: '', isComment: true },
+      { cmd: 'git add . && git commit -m "Add my feature"', note: 'Commit on the feature branch' },
+      { cmd: 'git push -u origin feature/my-feature',       note: 'Push the branch to GitHub' },
+      { cmd: '# open a Pull Request on GitHub → get reviewed → merge', note: '', isComment: true },
+      { cmd: 'git switch main && git pull',                 note: 'After merging, update your local main' },
+      { cmd: 'git branch -d feature/my-feature',            note: 'Clean up the merged local branch' },
+    ]
+  }
+];
+
+const allCommands = [
+  // ── Setup & Config ────────────────────────────────────────────────────────
+  { cat: 'setup', name: 'git init', danger: 'safe',
+    summary: 'Initialize a new repository in the current directory',
+    desc: 'Creates a hidden .git directory that stores the entire version history. Run once at the start of a new project. Safe to run in an existing repo — it won\'t overwrite history.',
+    options: [
+      { flag: '(no args)',  desc: 'Initialize in the current folder' },
+      { flag: '--bare',     desc: 'Create a bare repo (for servers — no working files)' },
+    ],
+    example: 'cd my-project\ngit init',
+    note: '' },
+
+  { cat: 'setup', name: 'git clone &lt;url&gt;', danger: 'safe',
+    summary: 'Copy a remote repository to your local machine',
+    desc: 'Downloads the entire repo (all history, all branches) and creates a remote named "origin" pointing back to the source.',
+    options: [
+      { flag: '(url)',           desc: 'Clone via HTTPS (prompts for password)' },
+      { flag: '--depth 1',       desc: 'Shallow clone — only the most recent commit (faster for large repos)' },
+      { flag: '--branch &lt;name&gt;', desc: 'Clone a specific branch' },
+    ],
+    example: 'git clone https://github.com/user/repo.git\ngit clone git@github.com:user/repo.git  # SSH',
+    note: 'After cloning, cd into the newly created folder to start working.' },
+
+  { cat: 'setup', name: 'git config', danger: 'safe',
+    summary: 'Get and set configuration options (name, email, editor…)',
+    desc: 'Git has three config levels: --system (all users on the machine), --global (your user account), and --local (this repo only). Use --global for everyday setup.',
+    options: [
+      { flag: '--global user.name "Name"',        desc: 'Set your name for all commits' },
+      { flag: '--global user.email "email"',       desc: 'Set your email for all commits' },
+      { flag: '--list',                            desc: 'View all current settings' },
+      { flag: '--global core.editor "code --wait"', desc: 'Set VS Code as your default editor' },
+    ],
+    example: 'git config --global user.name "Loren Ransom"\ngit config --global user.email "lorentransom@gmail.com"\ngit config --list',
+    note: 'Run this setup once on any new computer before your first commit.' },
+
+  // ── Snapshotting ──────────────────────────────────────────────────────────
+  { cat: 'snapshot', name: 'git status', danger: 'safe',
+    summary: 'Show the state of your working directory and staging area',
+    desc: 'Shows which files are modified (not yet staged), staged (ready to commit), and untracked (new files Git doesn\'t know about yet). This is a read-only command — completely safe.',
+    options: [
+      { flag: '(no args)', desc: 'Full output' },
+      { flag: '-s',        desc: 'Short format — compact one-line-per-file view' },
+    ],
+    example: 'git status\ngit status -s',
+    note: 'Run this constantly. It\'s free and always tells you where you are.' },
+
+  { cat: 'snapshot', name: 'git add', danger: 'safe',
+    summary: 'Stage changes — move them into the staging area for the next commit',
+    desc: 'Moves changes from the working directory into the staging area (index). Only staged changes will be included in the next commit. You can stage specific files or everything at once.',
+    options: [
+      { flag: '&lt;file&gt;', desc: 'Stage a specific file' },
+      { flag: '.',         desc: 'Stage everything in the current directory (and subdirectories)' },
+      { flag: '-p',        desc: 'Interactively choose which lines of a file to stage' },
+    ],
+    example: 'git add README.md\ngit add src/\ngit add .\ngit add -p   # pick specific changes',
+    note: 'Use git add -p for surgical control over exactly what goes into a commit.' },
+
+  { cat: 'snapshot', name: 'git diff', danger: 'safe',
+    summary: 'Show exactly what changed since the last commit',
+    desc: 'Without flags: shows changes in the working directory that haven\'t been staged yet. With --staged: shows what\'s in the staging area vs the last commit.',
+    options: [
+      { flag: '(no args)',        desc: 'Show unstaged changes' },
+      { flag: '--staged',         desc: 'Show staged changes vs the last commit' },
+      { flag: 'branch1..branch2', desc: 'Compare two branches' },
+      { flag: 'HEAD~2',           desc: 'Compare working directory against 2 commits ago' },
+    ],
+    example: 'git diff\ngit diff --staged\ngit diff main..feature-branch',
+    note: '' },
+
+  { cat: 'snapshot', name: 'git commit', danger: 'safe',
+    summary: 'Save staged changes as a new permanent snapshot',
+    desc: 'Creates a new commit (snapshot) in your local repo with a unique hash. Nothing leaves your machine until you git push. Write commit messages in present tense: "Add login" not "Added login".',
+    options: [
+      { flag: '-m "message"',  desc: 'Commit with an inline message' },
+      { flag: '-am "message"', desc: 'Stage all tracked changed files and commit in one step' },
+      { flag: '--amend',       desc: 'Edit the most recent commit (before pushing only)' },
+    ],
+    example: 'git commit -m "Add user login page"\ngit commit -am "Fix typo in nav bar"',
+    note: 'Commit early and often. Small, focused commits are much easier to review and undo.' },
+
+  { cat: 'snapshot', name: 'git commit --amend', danger: 'caution',
+    summary: 'Modify the most recent commit',
+    desc: 'Replaces the last commit with a new one. Use it to fix a typo in the commit message or add a forgotten file. Do NOT use after pushing — it rewrites history and will cause problems for collaborators.',
+    options: [
+      { flag: '-m "new message"', desc: 'Change the commit message' },
+      { flag: '--no-edit',        desc: 'Amend without changing the message (just adds staged files)' },
+    ],
+    example: '# forgot to add a file:\ngit add forgotten-file.txt\ngit commit --amend --no-edit\n\n# fix the commit message:\ngit commit --amend -m "Better message"',
+    note: '⚠️ Only safe before pushing. After pushing, use git revert instead.' },
+
+  { cat: 'snapshot', name: 'git stash', danger: 'safe',
+    summary: 'Temporarily shelve changes you\'re not ready to commit',
+    desc: 'Saves your uncommitted changes to a temporary stack, then reverts your working directory to the last commit. Useful when you need to switch branches mid-task.',
+    options: [
+      { flag: '(no args)',      desc: 'Stash all uncommitted changes' },
+      { flag: 'pop',            desc: 'Restore the most recent stash and remove it from the stack' },
+      { flag: 'list',           desc: 'See all stashed changes' },
+      { flag: 'apply stash@{1}', desc: 'Apply a specific stash without removing it' },
+      { flag: 'drop',           desc: 'Discard the most recent stash' },
+    ],
+    example: 'git stash            # save current work\ngit switch other-branch\n# do some work...\ngit switch original-branch\ngit stash pop        # restore your work',
+    note: '' },
+
+  // ── Branching ─────────────────────────────────────────────────────────────
+  { cat: 'branch', name: 'git branch', danger: 'safe',
+    summary: 'List, create, or delete branches',
+    desc: 'A branch is a lightweight pointer to a commit. Listing shows where you are. Creating a branch doesn\'t switch to it — use git switch to move there.',
+    options: [
+      { flag: '(no args)',      desc: 'List all local branches (* = current)' },
+      { flag: '-a',             desc: 'List local and remote branches' },
+      { flag: '&lt;name&gt;',   desc: 'Create a new branch at the current commit' },
+      { flag: '-d &lt;name&gt;', desc: 'Delete a fully merged branch' },
+      { flag: '-D &lt;name&gt;', desc: 'Force-delete a branch (even if not merged)' },
+    ],
+    example: 'git branch            # list\ngit branch feature-x  # create\ngit branch -d feature-x  # delete (safe)\ngit branch -D feature-x  # force delete',
+    note: '-D is destructive — make sure you\'ve merged or don\'t need the branch.' },
+
+  { cat: 'branch', name: 'git switch', danger: 'safe',
+    summary: 'Switch to a different branch (modern syntax)',
+    desc: 'Moves HEAD to the specified branch and updates your working directory. git switch is the modern replacement for git checkout for branch operations.',
+    options: [
+      { flag: '&lt;branch&gt;',      desc: 'Switch to an existing branch' },
+      { flag: '-c &lt;new-name&gt;', desc: 'Create a new branch and switch to it in one step' },
+    ],
+    example: 'git switch main\ngit switch feature-login\ngit switch -c feature/new-header',
+    note: 'git checkout &lt;branch&gt; does the same thing — you\'ll see the older syntax everywhere.' },
+
+  { cat: 'branch', name: 'git merge', danger: 'caution',
+    summary: 'Integrate changes from another branch into the current branch',
+    desc: 'Combines the histories of two branches. If there are no conflicts, may create a merge commit. If there are conflicts, Git pauses and asks you to resolve them manually in the affected files.',
+    options: [
+      { flag: '&lt;branch&gt;', desc: 'Merge the specified branch into your current branch' },
+      { flag: '--no-ff',        desc: 'Always create a merge commit (even if fast-forward is possible)' },
+      { flag: '--squash',       desc: 'Combine all branch commits into one staged change' },
+      { flag: '--abort',        desc: 'Cancel a merge that hit conflicts' },
+    ],
+    example: 'git switch main\ngit merge feature-login',
+    note: 'Always switch into the target branch first (git switch main), then merge the source.' },
+
+  { cat: 'branch', name: 'git rebase', danger: 'caution',
+    summary: 'Reapply your commits on top of another branch',
+    desc: 'Moves or "replays" your commits on top of a new base, creating a cleaner linear history than merge. The golden rule: never rebase commits already on a shared/public branch.',
+    options: [
+      { flag: '&lt;branch&gt;',    desc: 'Rebase current branch on top of &lt;branch&gt;' },
+      { flag: '-i HEAD~3',         desc: 'Interactive rebase — edit, squash, or reorder the last 3 commits' },
+      { flag: '--abort',           desc: 'Cancel an in-progress rebase' },
+      { flag: '--continue',        desc: 'Continue after resolving a conflict during rebase' },
+    ],
+    example: 'git switch feature\ngit rebase main\n\n# Interactive rebase to clean up last 3 commits:\ngit rebase -i HEAD~3',
+    note: '⚠️ Never rebase commits that have been pushed to a shared repo — it rewrites history.' },
+
+  // ── Remote ────────────────────────────────────────────────────────────────
+  { cat: 'remote', name: 'git remote', danger: 'safe',
+    summary: 'Manage connections to remote repositories',
+    desc: 'Remotes are bookmarks to other copies of your repo (like GitHub). "origin" is the conventional name given to the default remote when you clone or add one.',
+    options: [
+      { flag: '-v',                     desc: 'List all remotes with their URLs' },
+      { flag: 'add &lt;name&gt; &lt;url&gt;', desc: 'Add a new remote connection' },
+      { flag: 'remove &lt;name&gt;',    desc: 'Remove a remote' },
+      { flag: 'rename &lt;old&gt; &lt;new&gt;', desc: 'Rename a remote' },
+    ],
+    example: 'git remote -v\ngit remote add origin https://github.com/user/repo.git',
+    note: '' },
+
+  { cat: 'remote', name: 'git fetch', danger: 'safe',
+    summary: 'Download remote changes without applying them',
+    desc: 'Downloads commits, branches, and tags from the remote into your local repo — but does NOT modify your working files or current branch. The safest way to see what\'s new.',
+    options: [
+      { flag: '(no args)',  desc: 'Fetch from origin' },
+      { flag: '&lt;remote&gt;', desc: 'Fetch from a specific remote' },
+      { flag: '--all',      desc: 'Fetch from all remotes' },
+    ],
+    example: 'git fetch\ngit log origin/main  # inspect what was fetched',
+    note: 'git pull = git fetch + git merge. Run fetch when you want to look before merging.' },
+
+  { cat: 'remote', name: 'git pull', danger: 'caution',
+    summary: 'Fetch and merge remote changes into your current branch',
+    desc: 'Combines git fetch (download) and git merge (integrate). If your branch and the remote have diverged, a merge commit is created. Best to run with a clean working directory.',
+    options: [
+      { flag: '(no args)',    desc: 'Pull from the tracked remote branch' },
+      { flag: '--rebase',     desc: 'Use rebase instead of merge (keeps a cleaner linear history)' },
+      { flag: '--ff-only',    desc: 'Only pull if it\'s a fast-forward (abort if a merge is needed)' },
+    ],
+    example: 'git pull\ngit pull --rebase',
+    note: 'Commit or stash your local changes before pulling to avoid messy conflicts.' },
+
+  { cat: 'remote', name: 'git push', danger: 'caution',
+    summary: 'Upload local commits to the remote repository',
+    desc: 'Sends commits from your local branch to the corresponding remote branch. If the remote has new commits you don\'t have yet, Git will reject the push — pull first.',
+    options: [
+      { flag: '(no args)',             desc: 'Push to the tracked remote branch' },
+      { flag: '-u origin &lt;branch&gt;', desc: 'Push and set up upstream tracking (needed the first time)' },
+      { flag: '--tags',                desc: 'Push all local tags to the remote' },
+    ],
+    example: 'git push\ngit push -u origin main         # first push\ngit push -u origin feature-branch  # new branch',
+    note: '' },
+
+  { cat: 'remote', name: 'git push --force', danger: 'destructive',
+    summary: 'Force-overwrite the remote branch history',
+    desc: 'Replaces the remote branch with your local version, discarding any commits that existed on the remote but not locally. Can permanently destroy teammates\' work on shared branches.',
+    options: [
+      { flag: '--force',            desc: 'Force push (dangerous — no safety net)' },
+      { flag: '--force-with-lease', desc: 'Safer: only force push if no one else pushed since your last fetch' },
+    ],
+    example: '# prefer --force-with-lease over --force:\ngit push --force-with-lease',
+    note: '🚨 NEVER force push to main or any shared branch. Only use on your own private feature branches after rebasing.' },
+
+  // ── History ───────────────────────────────────────────────────────────────
+  { cat: 'history', name: 'git log', danger: 'safe',
+    summary: 'Show the commit history',
+    desc: 'Displays the log of commits on the current branch, newest first. Each entry shows the commit hash, author, date, and message.',
+    options: [
+      { flag: '--oneline',          desc: 'Compact one-line-per-commit view' },
+      { flag: '--graph',            desc: 'Show a visual ASCII tree of branches and merges' },
+      { flag: '--all',              desc: 'Show commits from all branches, not just the current one' },
+      { flag: '-n 10',              desc: 'Show only the last 10 commits' },
+      { flag: '-p',                 desc: 'Show the diff introduced by each commit' },
+      { flag: '--author="Name"',    desc: 'Filter by author' },
+    ],
+    example: 'git log\ngit log --oneline\ngit log --oneline --graph --all',
+    note: '' },
+
+  { cat: 'history', name: 'git show', danger: 'safe',
+    summary: 'Show the details and diff of a specific commit',
+    desc: 'Displays the commit metadata (author, date, message) and the exact changes it introduced. You only need the first 6–7 characters of the hash.',
+    options: [
+      { flag: '&lt;hash&gt;',  desc: 'Show a specific commit' },
+      { flag: 'HEAD',          desc: 'Show the most recent commit' },
+      { flag: 'HEAD~2',        desc: 'Show the commit 2 before HEAD' },
+    ],
+    example: 'git show HEAD\ngit show a3f4b9c',
+    note: '' },
+
+  { cat: 'history', name: 'git blame &lt;file&gt;', danger: 'safe',
+    summary: 'Show who last modified each line of a file',
+    desc: 'Annotates each line with the commit hash, author, and date that last changed it. Useful for understanding context around code you didn\'t write.',
+    options: [
+      { flag: '&lt;file&gt;',       desc: 'Annotate the entire file' },
+      { flag: '-L 10,20 &lt;file&gt;', desc: 'Only show lines 10–20' },
+    ],
+    example: 'git blame README.md\ngit blame -L 5,15 app.js',
+    note: '' },
+
+  // ── Undoing ───────────────────────────────────────────────────────────────
+  { cat: 'undo', name: 'git restore', danger: 'destructive',
+    summary: 'Discard changes in the working directory or unstage a file',
+    desc: 'Two very different behaviors depending on the flag. Without --staged: permanently discards unsaved edits in your working directory. With --staged: safely moves a file back to unstaged (keeps your edits).',
+    options: [
+      { flag: '&lt;file&gt;',           desc: '⚠️ Discard working directory changes for that file (PERMANENT)' },
+      { flag: '--staged &lt;file&gt;',   desc: 'Unstage a file — your edits are kept, just removed from staging' },
+      { flag: '--source HEAD~1 &lt;file&gt;', desc: 'Restore a file to how it looked 1 commit ago' },
+    ],
+    example: '# just unstage (safe):\ngit restore --staged README.md\n\n# discard unsaved edits (permanent):\ngit restore README.md',
+    note: '🚨 git restore &lt;file&gt; without --staged permanently destroys your unsaved changes. There is no undo.' },
+
+  { cat: 'undo', name: 'git reset', danger: 'destructive',
+    summary: 'Move HEAD backward — with different levels of intensity',
+    desc: 'Moves the current branch pointer to an earlier commit. The three modes control what happens to the changes that were in the commits you\'re undoing.',
+    options: [
+      { flag: '--soft HEAD~1',  desc: 'Undo last commit — keep changes staged (safest)' },
+      { flag: '--mixed HEAD~1', desc: 'Undo last commit — keep changes unstaged (default mode)' },
+      { flag: '--hard HEAD~1',  desc: 'Undo last commit — permanently discard all changes (dangerous)' },
+    ],
+    example: 'git reset --soft HEAD~1   # nothing lost — changes are staged\ngit reset --mixed HEAD~1  # changes kept, but unstaged\ngit reset --hard HEAD~1   # dangerous — all changes gone',
+    note: '🚨 --hard permanently deletes uncommitted changes. For pushed commits, use git revert instead.' },
+
+  { cat: 'undo', name: 'git revert', danger: 'safe',
+    summary: 'Create a new commit that undoes a previous one',
+    desc: 'The safe way to undo a pushed commit. Instead of rewriting history, it creates a new commit that applies the inverse of the target commit. Safe to use on shared branches.',
+    options: [
+      { flag: '&lt;hash&gt;',    desc: 'Revert a specific past commit' },
+      { flag: 'HEAD',            desc: 'Revert the most recent commit' },
+      { flag: '--no-commit',     desc: 'Apply the revert but don\'t auto-commit (lets you edit first)' },
+    ],
+    example: 'git revert HEAD       # undo the last commit\ngit revert a3f4b9c    # undo a specific past commit',
+    note: 'Prefer revert over reset for anything that has been pushed to a shared repo.' },
+
+  { cat: 'undo', name: 'git clean', danger: 'destructive',
+    summary: 'Remove untracked files from the working directory',
+    desc: 'Permanently deletes files that Git has never tracked (files that were never added or committed). Always run -n first to preview what will be deleted.',
+    options: [
+      { flag: '-n',  desc: 'Dry run — show what WOULD be deleted without actually deleting' },
+      { flag: '-f',  desc: 'Force delete untracked files' },
+      { flag: '-fd', desc: 'Force delete untracked files AND directories' },
+      { flag: '-fX', desc: 'Remove only Git-ignored files (e.g. build artifacts)' },
+    ],
+    example: 'git clean -n    # always preview first!\ngit clean -fd   # then delete',
+    note: '🚨 Always run git clean -n first. Deleted untracked files cannot be recovered — they are not in the Git history.' },
+];
+
+const categories = [
+  { id: 'setup',    label: '⚙️ Setup & Config'     },
+  { id: 'snapshot', label: '📸 Snapshotting'        },
+  { id: 'branch',   label: '🌿 Branching'           },
+  { id: 'remote',   label: '☁️ Remote'              },
+  { id: 'history',  label: '📜 Inspecting History'  },
+  { id: 'undo',     label: '↩️ Undoing Changes'     },
+];
+
+// ═══════════════════════════════════════════════════════════════ HELPERS
+
+function badge(danger) {
+  if (danger === 'safe')        return '<span class="shrink-0 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/70 text-emerald-700 dark:text-emerald-300">✓ Safe</span>';
+  if (danger === 'caution')     return '<span class="shrink-0 px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 dark:bg-amber-900/70 text-amber-700 dark:text-amber-300">⚠ Caution</span>';
+  if (danger === 'destructive') return '<span class="shrink-0 px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300">✕ Destructive</span>';
+  return '';
+}
+
+function copyBtn(text, small = false) {
+  const cls = small
+    ? 'copy-btn absolute top-1.5 right-1.5 px-2 py-0.5 text-xs bg-gray-700 hover:bg-gray-500 text-gray-200 rounded cursor-pointer'
+    : 'copy-btn absolute top-2 right-2 px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded cursor-pointer';
+  return `<button class="${cls}" onclick="copyText(this,${JSON.stringify(text)})">copy</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════ RENDER
+
+function renderCoreCards() {
+  const el = document.getElementById('core-cards');
+  el.innerHTML = coreCommands.map(c => `
+    <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow flex flex-col gap-3">
+      <div class="flex items-start justify-between gap-2">
+        <code class="text-sm font-bold text-blue-700 dark:text-blue-400 leading-snug">${c.cmd}</code>
+        ${badge(c.danger)}
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">${c.desc}</p>
+      <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-2.5 relative group">
+        <pre class="text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">${c.example}</pre>
+        ${copyBtn(c.example.replace(/&lt;/g,'<').replace(/&gt;/g,'>'), false)}
+      </div>
+      <div class="text-xs text-gray-400 dark:text-gray-500">${c.group}</div>
+    </div>`).join('');
+}
+
+function renderScenarios() {
+  const el = document.getElementById('tab-panels');
+  el.innerHTML = scenarios.map((s, si) => {
+    let body = '';
+
+    if (s.steps) {
+      let stepNum = 0;
+      body = '<div class="space-y-3">' + s.steps.map(st => {
+        const isComment = st.isComment || st.cmd.startsWith('#');
+        if (!isComment) stepNum++;
+        const num = isComment
+          ? `<div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-xs shrink-0">·</div>`
+          : `<div class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold shrink-0">${stepNum}</div>`;
+        const rawCmd = st.cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        return `
+          <div class="flex gap-3 items-start">
+            ${num}
+            <div class="flex-1 min-w-0">
+              <div class="bg-gray-900 dark:bg-gray-950 rounded-lg px-3 py-2 relative group">
+                <code class="text-sm font-mono text-green-400">${st.cmd}</code>
+                ${!isComment ? copyBtn(rawCmd, true) : ''}
+              </div>
+              ${st.note ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-0.5">${st.note}</p>` : ''}
+            </div>
+          </div>`;
+      }).join('') + '</div>';
+    }
+
+    if (s.subsections) {
+      body = '<div class="space-y-6">' + s.subsections.map(sub => {
+        const rawCmd = sub.steps[0].cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        return `
+          <div>
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pb-1 border-b border-gray-200 dark:border-gray-700">${sub.label}</h4>
+            <div class="flex gap-3 items-start">
+              <div class="flex-1 min-w-0">
+                <div class="bg-gray-900 dark:bg-gray-950 rounded-lg px-3 py-2 relative group">
+                  <code class="text-sm font-mono text-green-400">${sub.steps[0].cmd}</code>
+                  ${copyBtn(rawCmd, true)}
+                </div>
+                ${sub.steps[0].note ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sub.steps[0].note}</p>` : ''}
+              </div>
+              <div class="mt-1">${badge(sub.steps[0].danger || 'safe')}</div>
+            </div>
+          </div>`;
+      }).join('') + '</div>';
+    }
+
+    return `
+      <div class="tab-panel ${si === 0 ? '' : 'hidden'}" id="panel-${si}">
+        <p class="text-gray-500 dark:text-gray-400 text-sm text-center mb-6">${s.intro}</p>
+        ${body}
+      </div>`;
+  }).join('');
+}
+
+function renderReference() {
+  const el = document.getElementById('reference-container');
+  el.innerHTML = categories.map(cat => {
+    const cmds = allCommands.filter(c => c.cat === cat.id);
+    return `
+      <div class="cat-section mb-6" data-cat="${cat.id}">
+        <h3 class="text-base font-bold text-gray-700 dark:text-gray-300 mb-3">${cat.label}</h3>
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800/80">
+          ${cmds.map((cmd, i) => {
+            const border = i > 0 ? 'border-t border-gray-200 dark:border-gray-700' : '';
+            const searchData = `${cmd.name} ${cmd.summary} ${cmd.desc} ${cmd.cat}`.toLowerCase().replace(/&lt;/g,'').replace(/&gt;/g,'');
+            const rawExample = cmd.example.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+            return `
+              <div class="cmd-item ${border}" data-search="${searchData}">
+                <button onclick="toggleCmd(this)"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center gap-3 min-w-0">
+                  <div class="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <code class="text-sm font-bold text-blue-700 dark:text-blue-400">${cmd.name}</code>
+                    <span class="text-sm text-gray-500 dark:text-gray-400 truncate">— ${cmd.summary}</span>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    ${badge(cmd.danger)}
+                    <span class="chevron text-gray-400 text-xs">▼</span>
+                  </div>
+                </button>
+                <div class="cmd-detail">
+                  <div class="px-4 pb-5 pt-2 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">${cmd.desc}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Options / Flags</div>
+                        <div class="space-y-1.5">
+                          ${cmd.options.map(o => `
+                            <div class="flex gap-2 text-xs">
+                              <code class="text-blue-600 dark:text-blue-400 font-mono shrink-0">${o.flag}</code>
+                              <span class="text-gray-500 dark:text-gray-400">${o.desc}</span>
+                            </div>`).join('')}
+                        </div>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Example</div>
+                        <div class="bg-gray-900 dark:bg-gray-950 rounded-lg p-3 relative group">
+                          <pre class="text-xs font-mono text-green-400 whitespace-pre-wrap leading-relaxed">${cmd.example}</pre>
+                          ${copyBtn(rawExample, true)}
+                        </div>
+                      </div>
+                    </div>
+                    ${cmd.note ? `<div class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2">${cmd.note}</div>` : ''}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════ INTERACTIONS
+
+function toggleDark() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('git-ref-theme', isDark ? 'dark' : 'light');
+}
+
+function switchTab(idx) {
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('hidden', i !== idx));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+}
+
+function toggleCmd(btn) {
+  const detail  = btn.nextElementSibling;
+  const chevron = btn.querySelector('.chevron');
+  const opening = !detail.classList.contains('open');
+  detail.classList.toggle('open', opening);
+  chevron.classList.toggle('open', opening);
+}
+
+function filterCommands() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.cmd-item').forEach(item => {
+    const match = !q || (item.dataset.search || '').includes(q);
+    item.classList.toggle('search-hidden', !match);
+    if (match) visible++;
+  });
+  document.querySelectorAll('.cat-section').forEach(sec => {
+    const any = sec.querySelectorAll('.cmd-item:not(.search-hidden)').length > 0;
+    sec.classList.toggle('search-hidden', !any);
+  });
+  document.getElementById('no-results').classList.toggle('hidden', visible > 0);
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ copied';
+    btn.style.background = '#16a34a';
+    btn.style.color = 'white';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 1500);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════ INIT
+
+(function init() {
+  const saved = localStorage.getItem('git-ref-theme');
+  const sys   = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark  = saved === 'dark' || (!saved && sys);
+  if (dark) document.documentElement.classList.add('dark');
+  document.getElementById('theme-icon').textContent = dark ? '☀️' : '🌙';
+
+  renderCoreCards();
+  renderScenarios();
+  renderReference();
+
+  // activate first tab
+  switchTab(0);
+})();
+</script>
+</body>
+</html>
